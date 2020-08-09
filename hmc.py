@@ -100,23 +100,25 @@ def body_fun_sampling(i, val, grad_fun, log_posterior):
     )
 
     val["samples"] = index_update(val["samples"], i, theta)
+    val['accept_probs'] = index_update(val['accept_probs'], i, accept_prob)
     val["theta"] = theta
     val["key"] = key
 
     return val
 
 
-def draw_samples(theta_dim, eps, M, L, key, n_samples, grad_fun, log_posterior):
+def draw_samples(init_theta, eps, M, L, key, n_samples, grad_fun, log_posterior):
 
-    theta = jnp.zeros(theta_dim)
+    theta_dim = init_theta.shape[0]
 
     init_val = {
-        "theta": theta,
+        "theta": init_theta,
         "eps": eps,
         "M": M,
         "key": key,
         "L": L,
         "samples": jnp.zeros((n_samples, theta_dim)),
+        "accept_probs": jnp.zeros(n_samples)
     }
 
     to_iterate = lambda i, val: body_fun_sampling(i, val, grad_fun, log_posterior)
